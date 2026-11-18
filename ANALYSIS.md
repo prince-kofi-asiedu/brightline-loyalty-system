@@ -6,15 +6,30 @@ Rank No. | Issue | Where | Root Cause | Code Smell / SOLID violated |
 | 1.| Silently swallowed exceptions | PointsCalculator.java:32–35 (catch block) |  The catch block returns 0 for all exceptions. Unknown members, bad tiers and code bugs all become “0 points” with no log or alert. | Swallowed exception / error hiding; overly broad catch |
 2.| High-level class creates its own low-level dependency | PointsCalculator.java:7 | new InMemoryMemberRepository() inside the class. The MemberRepository interface exists, but callers and tests can’t pass in a different one. | Dependency Inversion violation; hidden dependency; tight coupling|
 3.| Repository returns null for a missing member | Demo.java; new PointsCalculator(), InMemoryMemberRepository.java  | members.get(id) returns null, which causes a NullPointerException on getTier() that row 1 then swallows | Null return instead of a domain exception (MemberNotFoundException) |
-4.| Wrong monetary type | PointsCalculator.calculatePoints(String, double); (int) casts on lines 14 and 20 | | |
-5.|Tests can’t control their dependency | Whole test class | The calculator creates its own repository, so tests depend on hidden seed data | Hidden test fixture; not isolated (a consequence of code row 2) |
-6.| Business rules untested | Whole test class | No exact value per tier, no test of the bonus (including the 500.00 vs 500.01 boundary), no test of rounding (150 at SILVER gives 22; 99.99 gives 9), and no test that the bonus is applied after the multiplier | Missing boundary and equivalence-class tests |
-7.| Invalid input untested | Whole test class | No tests for zero, negative, NaN or Infinity amounts, or for an unknown or lowercase tier | Missing edge-case tests |
-8.| Test names don’t match what the tests do | calculatesGoldPoints, awardsPointsForAPurchase | The first calculates nothing. The second uses a SILVER member but never checks the 1.5× multiplier. | Misleading test names |
-9.| Magic test IDs | All three tests | "m1", "m2" and "m3" hide the tier, so the reader has to open the repository | Mystery guest: Does not follow the Arrange Act Assert format of testing |
-10.| No tests for the repository | InMemoryMemberRepository | Neither finding a member nor the null-for-unknown case is covered | Untested class |
-11.| Poor test structure | Whole test class | No @ParameterizedTest for the tier table, no Arrange-Act-Assert layout, no @DisplayName | Test readability and duplication |
-12.| Wildcard imports | PointsCalculatorTest.java:5–6 | Assertions.* and Mockito.* hide where each method comes from | Readability/style nit (not a SOLID violation)  |
+4.| Wrong monetary type | PointsCalculator.calculatePoints(String, double); (int) casts on lines 14 and 20 | Money held in binary floating point, and points truncated by casts. GHS 99.99 gives 9 points, and SILVER at GHS 150 gives 22, not 22.5. | Floating point for currency; implicit or undocumented rounding |
+5.| No input validation | calculatePoints() and Member constructor| No guard clauses on amount, memberId or tier. GHS −100 gives −10 points, and Infinity gives Integer.MAX_VALUE + 50, which overflows to a negative number. | Missing guard clauses / no fail-fast |
+6.| Tier stored as a String | Member.java:6; PointsCalculator.java:17–23 | "gold", "PLATINUM" and null are all accepted. An unknown tier silently gets the 1× rate, and a null tier throws a NullPointerException that becomes 0. | Primitive obsession|
+7.| If/else chain on tier | PointsCalculator.java:17–23 | Every new tier means editing this method | Open/Closed violation; conditional on type code |
+8.| Method does more than one thing | calculatePoints() | Looks up the member, calculates, applies the bonus and prints to System.out in one method | Single Responsibility violation |
+9.| Magic numbers | PointsCalculator.java:14, 18, 20, 22, 26, 27 | 10, 1, 1.5, 2, 500 and 50 are unnamed business rules | Magic numbers which make the code difficult to understand |
+10.| Constructor hard-codes seed data | InMemoryMemberRepository.java:10–14 | Demo/test members are baked into a production class  | Hard-coded test data in production code; constructor doing real work | 
+
+## Testing Issues Detected
+| Rank No. | Issue | Where | Root cause | Code smell / testing anti-pattern |
+|---|---|---|---|---|
+| 1. | Test mocks the class it is testing | `PointsCalculatorTest.calculatesGoldPoints` (lines 20–22) | Stubs `calculatePoints` to return 50, then asserts 50. No production code runs, so it passes even if the logic is broken. | Mocking the class under test (a self-fulfilling test); false confidence because 50 is the correct GOLD value |
+| 2. | Assertion that can never fail | `awardsPointsForAPurchase` (line 29) | `assertNotNull` on a primitive `int` autoboxes to a non-null `Integer`, so 30, 0 and −999 all pass | Tautological assertion; inflates JaCoCo coverage for the SILVER path |
+| 3. | Assertion too weak | `awardsPointsToAMember` (line 14) | `assertTrue(points > 0)` when the answer is exactly 10. A wrong divisor, multiplier or bonus still passes. | Weak or imprecise assertion (should be `assertEquals(10, points)`) |
+| 4. | Failure path never tested | Whole test class | No test for an unknown member, `null` ID or `null` tier, so the silent "0 points" behaviour goes unnoticed | Missing negative/error-path tests |
+| 5. | Tests can't control their dependency | Whole test class | The calculator creates its own repository, so tests depend on hidden seed data | Hidden test fixture; not isolated (a consequence of code row 2) |
+| 6. | Business rules untested | Whole test class | No exact value per tier, no test of the bonus (including the 500.00 vs 500.01 boundary), no test of rounding (150 at SILVER gives 22; 99.99 gives 9), and no test that the bonus is applied after the multiplier | Missing boundary and equivalence-class tests |
+| 7. | Invalid input untested | Whole test class | No tests for zero, negative, `NaN` or `Infinity` amounts, or for an unknown or lowercase tier | Missing edge-case tests |
+| 8. | Test names don't match what the tests do | `calculatesGoldPoints`, `awardsPointsForAPurchase` | The first calculates nothing. The second uses a SILVER member but never checks the 1.5× multiplier. | Misleading test names |
+| 9. | Magic test IDs | All three tests | `"m1"`, `"m2"` and `"m3"` hide the tier, so the reader has to open the repository | Mystery guest |
+| 10. | No tests for the repository | `InMemoryMemberRepository` | Neither finding a member nor the `null`-for-unknown case is covered | Untested class |
+| 11. | Poor test structure | Whole test class | No `@ParameterizedTest` for the tier table, no Arrange-Act-Assert layout, no `@DisplayName` | Test readability and duplication |
+| 12. | Wildcard imports | `PointsCalculatorTest.java:5–6` | `Assertions.*` and `Mockito.*` hide where each method comes from | Readability/style nit (not a SOLID violation) |
+
 
 ## Which AI-Generated Test Passes without Testing Anything
 ```calculatesGoldPoints()```: It mocks the method instead and returns a value. So the branch for computing the points for Gold tier is actually never tested.
