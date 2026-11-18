@@ -25,9 +25,6 @@ public class InMemoryMemberRepository implements MemberRepository {
     }
 
     boolean memberExists(Member member) {
-        if (findById(member.getId()) != null) {
-            return true;
-        }
-        return false;
+        return members.containsKey(member.getId());
     }
 }
