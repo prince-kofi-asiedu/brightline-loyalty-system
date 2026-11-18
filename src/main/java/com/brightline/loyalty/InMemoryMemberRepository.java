@@ -3,8 +3,8 @@ package com.brightline.loyalty;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.brightline.loyalty.member.Member;
 import com.brightline.loyalty.member.DuplicateMemberException;
+import com.brightline.loyalty.member.Member;
 
 public class InMemoryMemberRepository implements MemberRepository {
 
@@ -15,12 +15,19 @@ public class InMemoryMemberRepository implements MemberRepository {
         return members.get(id); // returns null when the id is not found
     }
 
-    @Override 
+    @Override
     public void save(Member member) throws IllegalArgumentException, DuplicateMemberException {
         String memberId = member.getId();
-        if (findById(memberId) != null) {
+        if (memberExists(member)) {
             throw new DuplicateMemberException("Member with id " + memberId + " already exists");
         }
         members.put(memberId, member);
+    }
+
+    boolean memberExists(Member member) {
+        if (findById(member.getId()) != null) {
+            return true;
+        }
+        return false;
     }
 }

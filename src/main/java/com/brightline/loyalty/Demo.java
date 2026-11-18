@@ -1,12 +1,12 @@
 package com.brightline.loyalty;
 
 import java.util.List;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import com.brightline.loyalty.member.DuplicateMemberException;
 import com.brightline.loyalty.member.Member;
 import com.brightline.loyalty.member.Tier;
-import com.brightline.loyalty.member.DuplicateMemberException;
 
 // A tiny runner so you can see the calculator work before you change anything.
 public class Demo {
@@ -38,9 +38,9 @@ public class Demo {
             System.out.println("Result m1 (STANDARD), GHS 100  -> " + calculator.calculatePoints("m1", 100));
             System.out.println("Result m2 (GOLD), GHS 250      -> " + calculator.calculatePoints("m2", 250));
             System.out.println("Result unknown member, GHS 100 -> " + calculator.calculatePoints("unknown", 100));
-    
-        } catch (IllegalArgumentException | DuplicateMemberException e ) {
+
+        } catch (IllegalArgumentException | DuplicateMemberException e) {
             LOG.log(Level.WARNING, e.getMessage(), e);
         }
-}
+    }
 }
