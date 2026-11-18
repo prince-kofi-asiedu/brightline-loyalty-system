@@ -20,4 +20,9 @@ public class InMemoryMemberRepository implements MemberRepository {
     public Member findById(String id) {
         return members.get(id); // returns null when the id is not found
     }
+
+    @Override 
+    public void save(Member member) {
+        members.put(member.getId(), member);
+    }
 }
