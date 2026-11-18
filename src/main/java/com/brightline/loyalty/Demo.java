@@ -4,9 +4,11 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.lang.ArithmeticException;
 
 import com.brightline.loyalty.member.DuplicateMemberException;
 import com.brightline.loyalty.member.Member;
+import com.brightline.loyalty.member.MemberNotFoundException;
 import com.brightline.loyalty.member.Tier;
 
 // A tiny runner so you can see the calculator work before you change anything.
@@ -28,20 +30,24 @@ public class Demo {
             List<Member> members = List.of(
                     new Member("m1", "Kofi Mensah", Tier.STANDARD),
                     new Member("m2", "Ama Owusu", Tier.GOLD),
-                    new Member("m3", "Yaa Boateng", Tier.SILVER)
-            );
+                    new Member("m3", "Yaa Boateng", Tier.SILVER));
 
             for (Member member : members) {
                 memoryMemberRepository.save(member);
             }
             PointsCalculator calculator = new PointsCalculator(memoryMemberRepository);
 
-            System.out.println("Result m1 (STANDARD), GHS 100  -> " + calculator.calculatePoints("m1", BigDecimal.valueOf(100)));
-            System.out.println("Result m2 (GOLD), GHS 250      -> " + calculator.calculatePoints("m2", BigDecimal.valueOf(250)));
-            System.out.println("Result unknown member, GHS 100 -> " + calculator.calculatePoints("unknown", BigDecimal.valueOf(100)));
+            System.out.println(
+                    "Result m1 (STANDARD), GHS 100  -> " + calculator.calculatePoints("m1", BigDecimal.valueOf(100)));
+            System.out.println(
+                    "Result m2 (GOLD), GHS 250      -> " + calculator.calculatePoints("m2", BigDecimal.valueOf(250)));
+            System.out.println("Result unknown member, GHS 100 -> "
+                    + calculator.calculatePoints("unknown", BigDecimal.valueOf(100)));
 
+        } catch (ArithmeticException | MemberNotFoundException  e) {
+            LOG.log(Level.WARNING, e.getMessage());
         } catch (IllegalArgumentException | DuplicateMemberException e) {
-            LOG.log(Level.WARNING, e.getMessage(), e);
+            LOG.log(Level.SEVERE, e.getMessage(), e);
         }
     }
 }

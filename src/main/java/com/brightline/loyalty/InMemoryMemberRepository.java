@@ -16,7 +16,7 @@ public class InMemoryMemberRepository implements MemberRepository {
         validateMemberId(id);
         boolean memberDoesNotExist = !memberExists(id);
         if (memberDoesNotExist) {
-            throw new MemberNotFoundException("Member " + id + "does not exist");
+            throw new MemberNotFoundException("Member " + id + " does not exist");
         }
         Member member = members.get(id);
         return member;

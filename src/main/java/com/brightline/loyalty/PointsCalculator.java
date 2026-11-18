@@ -1,5 +1,7 @@
 package com.brightline.loyalty;
 
+import java.lang.ArithmeticException;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
@@ -33,7 +35,7 @@ public class PointsCalculator {
         return amount.divide(BASE_POINT_DENOMINATOR, 0, RoundingMode.DOWN);
     }
 
-    private int applyTierMultiplier(BigDecimal basePoints, Tier tier) {
+    private int applyTierMultiplier(BigDecimal basePoints, Tier tier) throws ArithmeticException {
         return basePoints
                 .multiply(tier.multiplier())
                 .setScale(0, RoundingMode.DOWN)
@@ -48,7 +50,7 @@ public class PointsCalculator {
         return amount.compareTo(LOYALTY_BONUS_THRESHOLD) > 0;
     }
 
-    public int calculatePoints(String memberId, BigDecimal amount) throws MemberNotFoundException {
+    public int calculatePoints(String memberId, BigDecimal amount) throws MemberNotFoundException, ArithmeticException {
         validateMemberAndAmount(memberId, amount);
         Member member = repository.findById(memberId);
 
