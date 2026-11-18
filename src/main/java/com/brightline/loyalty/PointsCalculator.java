@@ -7,7 +7,11 @@ public class PointsCalculator {
 
     // The calculator makes its own repository. Convenient, but it means callers
     // and tests cannot give it a different one.
-    private final MemberRepository repository = new InMemoryMemberRepository();
+    private final MemberRepository repository;
+
+    public PointsCalculator(MemberRepository repository) {
+        this.repository = repository;
+    }
 
     public int calculatePoints(String memberId, double amount) {
         try {
