@@ -5,8 +5,6 @@ import com.brightline.loyalty.member.Tier;
 
 public class PointsCalculator {
 
-    // The calculator makes its own repository. Convenient, but it means callers
-    // and tests cannot give it a different one.
     private final MemberRepository repository;
 
     public PointsCalculator(MemberRepository repository) {
