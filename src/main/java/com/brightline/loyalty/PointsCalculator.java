@@ -1,5 +1,8 @@
 package com.brightline.loyalty;
 
+import com.brightline.loyalty.member.Member;
+import com.brightline.loyalty.member.Tier;
+
 public class PointsCalculator {
 
     // The calculator makes its own repository. Convenient, but it means callers
@@ -14,11 +17,11 @@ public class PointsCalculator {
             int points = (int) (amount / 10);
 
             // apply the member's tier multiplier
-            if (member.getTier().equals("STANDARD")) {
+            if (member.getTier().equals(Tier.STANDARD)) {
                 points = points * 1;
-            } else if (member.getTier().equals("SILVER")) {
+            } else if (member.getTier().equals(Tier.SILVER)) {
                 points = (int) (points * 1.5);
-            } else if (member.getTier().equals("GOLD")) {
+            } else if (member.getTier().equals(Tier.GOLD)) {
                 points = points * 2;
             }
 

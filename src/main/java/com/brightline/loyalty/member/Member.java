@@ -1,11 +1,12 @@
-package com.brightline.loyalty;
+package com.brightline.loyalty.member;
+
 
 public class Member {
     private final String id;
     private final String name;
-    private final String tier; // "STANDARD", "SILVER", "GOLD"
+    private final Tier tier;
 
-    public Member(String id, String name, String tier) {
+    public Member(String id, String name, Tier tier) {
         this.id = id;
         this.name = name;
         this.tier = tier;
@@ -13,5 +14,5 @@ public class Member {
 
     public String getId() { return id; }
     public String getName() { return name; }
-    public String getTier() { return tier; }
+    public Tier getTier() { return tier; }
 }

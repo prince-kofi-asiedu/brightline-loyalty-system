@@ -50,8 +50,7 @@ Result unknown member, GHS 100 -> 0
 ```
 
 
-## Design Rationale
-### Refactored Design
+## Refactored Design
 
 ```mermaid
 classDiagram
@@ -109,6 +108,7 @@ PointsCalculator ..> Tier : uses multiplier()
 ```
 
 
+## Design Rationale
 ### Key refactoring decisions
 
 **1. The calculator receives its repository; it doesn't create one.**
