@@ -5,7 +5,12 @@ import com.brightline.loyalty.member.Tier;
 
 public class PointsCalculator {
 
+    private static final int BASE_POINT_DENOMINATOR = 10;
+    private static final int LOYALTY_BONUS_THRESHOLD = 500;
+    private static final int LOYALTY_BONUS_POINTS = 50;
+
     private final MemberRepository repository;
+    
 
     public PointsCalculator(MemberRepository repository) {
         this.repository = repository;
@@ -16,20 +21,20 @@ public class PointsCalculator {
             Member member = repository.findById(memberId);
 
             // base points: one point for every GHS 10 spent
-            int points = (int) (amount / 10);
+            int points = (int) (amount / BASE_POINT_DENOMINATOR);
 
             // apply the member's tier multiplier
             if (member.getTier().equals(Tier.STANDARD)) {
-                points = points * 1;
+                points = points * Tier.SILVER.multiplier();
             } else if (member.getTier().equals(Tier.SILVER)) {
-                points = (int) (points * 1.5);
+                points = (int) (points * Tier.SILVER.multiplier());
             } else if (member.getTier().equals(Tier.GOLD)) {
-                points = points * 2;
+                points = points * Tier.GOLD.multiplier();
             }
 
             // loyalty bonus for big spenders
-            if (amount > 500) {
-                points = points + 50;
+            if (amount > LOYALTY_BONUS_THRESHOLD) {
+                points = points + LOYALTY_BONUS_POINTS;
             }
 
             System.out.println("Awarded " + points + " points to " + member.getName());
