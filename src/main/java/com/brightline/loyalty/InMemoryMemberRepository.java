@@ -4,17 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.brightline.loyalty.member.Member;
-import com.brightline.loyalty.member.Tier;
+import com.brightline.loyalty.member.DuplicateMemberException;
 
 public class InMemoryMemberRepository implements MemberRepository {
 
     private final Map<String, Member> members = new HashMap<>();
-
-    public InMemoryMemberRepository() {
-        members.put("m1", new Member("m1", "Kofi Mensah", Tier.STANDARD));
-        members.put("m2", new Member("m2", "Ama Owusu", Tier.GOLD));
-        members.put("m3", new Member("m3", "Yaa Boateng", Tier.SILVER));
-    }
 
     @Override
     public Member findById(String id) {
@@ -22,7 +16,11 @@ public class InMemoryMemberRepository implements MemberRepository {
     }
 
     @Override 
-    public void save(Member member) {
-        members.put(member.getId(), member);
+    public void save(Member member) throws IllegalArgumentException, DuplicateMemberException {
+        String memberId = member.getId();
+        if (findById(memberId) != null) {
+            throw new DuplicateMemberException("Member with id " + memberId + " already exists");
+        }
+        members.put(memberId, member);
     }
 }
