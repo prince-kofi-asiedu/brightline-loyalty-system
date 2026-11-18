@@ -18,6 +18,38 @@ class MemberTest {
     private static final String VALID_NAME = "Kofi Mensah";
     private static final Tier VALID_TIER = Tier.STANDARD;
 
+    @Test
+    @DisplayName("getId returns the id given to the constructor")
+    void getIdReturnsIdGivenToConstructor() {
+        Member member = new Member(VALID_ID, VALID_NAME, VALID_TIER);
+
+        String id = member.getId();
+
+        // VALID_ID and VALID_NAME differ, so a swapped field is caught
+        assertEquals(VALID_ID, id);
+    }
+
+    @Test
+    @DisplayName("getName returns the name given to the constructor")
+    void getNameReturnsNameGivenToConstructor() {
+        Member member = new Member(VALID_ID, VALID_NAME, VALID_TIER);
+
+        String name = member.getName();
+
+        assertEquals(VALID_NAME, name);
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @EnumSource(Tier.class)
+    @DisplayName("getTier returns the tier given to the constructor")
+    void getTierReturnsTierGivenToConstructor(Tier tier) {
+        Member member = new Member(VALID_ID, VALID_NAME, tier);
+
+        Tier actual = member.getTier();
+
+        assertEquals(tier, actual);
+    }
+
     @ParameterizedTest(name = "{0}")
     @EnumSource(Tier.class)
     @DisplayName("accepts every tier")
