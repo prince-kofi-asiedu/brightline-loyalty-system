@@ -4,6 +4,7 @@ import java.lang.ArithmeticException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Objects;
 
 import com.brightline.loyalty.member.Member;
 import com.brightline.loyalty.member.MemberNotFoundException;
@@ -19,7 +20,7 @@ public class PointsCalculator {
     private final MemberRepository repository;
 
     public PointsCalculator(MemberRepository repository) {
-        this.repository = repository;
+        this.repository = Objects.requireNonNull(repository, "repository is required");
     }
 
     private void validate(String memberId, BigDecimal amount) {
@@ -44,7 +45,7 @@ public class PointsCalculator {
     }
 
     private int addBonusIfEligible(int points, BigDecimal amount) {
-        return qualifiesForBonus(amount) ? points + LOYALTY_BONUS_POINTS : points;
+        return qualifiesForBonus(amount) ? Math.addExact(points, LOYALTY_BONUS_POINTS) : points;
     }
 
     private boolean qualifiesForBonus(BigDecimal amount) {
