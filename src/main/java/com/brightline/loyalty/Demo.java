@@ -37,12 +37,9 @@ public class Demo {
             }
             PointsCalculator calculator = new PointsCalculator(memoryMemberRepository);
 
-            System.out.println(
-                    "Result m1 (STANDARD), GHS 100  -> " + calculator.calculatePoints("m1", BigDecimal.valueOf(100)));
-            System.out.println(
-                    "Result m2 (GOLD), GHS 250      -> " + calculator.calculatePoints("m2", BigDecimal.valueOf(250)));
-            System.out.println("Result unknown member, GHS 100 -> "
-                    + calculator.calculatePoints("unknown", BigDecimal.valueOf(100)));
+            calculator.displayPoints("m1", BigDecimal.valueOf(100));
+            calculator.displayPoints("m2", BigDecimal.valueOf(250));
+            calculator.displayPoints("unknown", BigDecimal.valueOf(100));
 
         } catch (ArithmeticException | MemberNotFoundException  e) {
             LOG.log(Level.WARNING, e.getMessage());

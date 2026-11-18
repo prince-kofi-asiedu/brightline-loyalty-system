@@ -50,11 +50,22 @@ public class PointsCalculator {
         return amount.compareTo(LOYALTY_BONUS_THRESHOLD) > 0;
     }
 
+
     public int calculatePoints(String memberId, BigDecimal amount) throws MemberNotFoundException, ArithmeticException {
         validateMemberAndAmount(memberId, amount);
         Member member = repository.findById(memberId);
 
         int points = applyTierMultiplier(basePoints(amount), member.getTier());
         return addBonusIfEligible(points, amount);
+    }
+
+    public void displayPoints(String memberId, BigDecimal amount) throws MemberNotFoundException, ArithmeticException{
+        int points = calculatePoints(memberId, amount);
+        Member member = repository.findById(memberId);
+        System.out.printf("Awarded %d points to %s%n", points, member.getName());
+
+        String label = String.format("Result %s (%s), GHS %s",
+                member.getId(), member.getTier(), amount);
+        System.out.printf("%-31s-> %d%n", label, points);
     }
 }
