@@ -19,7 +19,7 @@ All versions are pinned in `pom.xml`, so every machine builds with the same set.
 | Mocking | `org.mockito:mockito-core` | 5.18.0 | test |
 | | `org.mockito:mockito-junit-jupiter` | 5.18.0 | test |
 | Test runner | `org.apache.maven.plugins:maven-surefire-plugin` | 3.2.5 | build plugin |
-| Code coverage | `org.jacoco:jacoco-maven-plugin` | 0.8.12 | build plugin |
+| Code coverage | `org.jacoco:jacoco-maven-plugin` | 0.8.14 | build plugin |
 | Mutation testing | `org.pitest:pitest-maven` | 1.16.1 | build plugin |
 | | `org.pitest:pitest-junit5-plugin` | 1.2.1 | PIT plugin dependency |
 | Integration test runner | `org.apache.maven.plugins:maven-failsafe-plugin`| 3.2.5 (surefire.version)| build plugin |
@@ -36,6 +36,7 @@ The versions live in `pom.xml` as properties:
     <jacoco.version>0.8.12</jacoco.version>
     <pitest.version>1.16.1</pitest.version>
     <pitest.junit5.version>1.2.1</pitest.junit5.version>
+    <surefire.version>3.2.5</surefire.version>
 </properties>
 
 <dependencyManagement>
