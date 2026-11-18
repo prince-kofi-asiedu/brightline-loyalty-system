@@ -54,7 +54,6 @@ Result unknown member, GHS 100 -> 0
 
 ```mermaid
 classDiagram
-
 class Member {
     -id: string
     -name: string
@@ -63,6 +62,7 @@ class Member {
     +getName()
     +getTier() Tier
 }
+
 
 class Tier {
     <<enumeration>>
@@ -73,11 +73,13 @@ class Tier {
     +multiplier() double
 }
 
+
 class MemberRepository {
     <<Interface>>
     +save(member: Member)
     +findById() Member
 }
+
 
 class InMemoryMemberRepository {
     -members: Map~String, Member~
@@ -85,9 +87,16 @@ class InMemoryMemberRepository {
     +findById() Member
 }
 
+
 class MemberNotFoundException {
     -memberId: string
 }
+
+
+class DuplicateMemberException {
+    +DuplicateMemberException(errMessage: string)
+}
+
 
 class PointsCalculator {
     -repository: MemberRepository
@@ -95,12 +104,16 @@ class PointsCalculator {
     +calculatePoints() int
 }
 
+
 Member "0..*" --> "1" Tier : has
+
 
 MemberRepository <|.. InMemoryMemberRepository : implements
 MemberRepository ..> Member : save() / findById()
 MemberRepository ..> MemberNotFoundException : throws
+MemberRepository ..> DuplicateMemberException : throws
 InMemoryMemberRepository "1" o-- "0..*" Member : stores
+
 
 PointsCalculator "1" --> "1" MemberRepository : injected via constructor
 PointsCalculator ..> Member : reads tier
