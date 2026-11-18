@@ -101,7 +101,14 @@ class DuplicateMemberException {
 class PointsCalculator {
     -repository: MemberRepository
     +PointsCalculator(repository: MemberRepository)
+    -basePoints() BigDecimal
+    -validate()
+    -applyTierMultiplier() int
+    -addBonusIfEligible() int
+    -qualifiesForBonus() boolean
     +calculatePoints() int
+    +displayMemberPoints()
+    
 }
 
 

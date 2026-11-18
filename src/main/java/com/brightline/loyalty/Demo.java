@@ -37,9 +37,9 @@ public class Demo {
             }
             PointsCalculator calculator = new PointsCalculator(memoryMemberRepository);
 
-            calculator.displayPoints("m1", BigDecimal.valueOf(100));
-            calculator.displayPoints("m2", BigDecimal.valueOf(250));
-            calculator.displayPoints("unknown", BigDecimal.valueOf(100));
+            calculator.displayMemberPoints("m1", BigDecimal.valueOf(100));
+            calculator.displayMemberPoints("m2", BigDecimal.valueOf(250));
+            calculator.displayMemberPoints("unknown", BigDecimal.valueOf(100));
 
         } catch (ArithmeticException | MemberNotFoundException  e) {
             LOG.log(Level.WARNING, e.getMessage());

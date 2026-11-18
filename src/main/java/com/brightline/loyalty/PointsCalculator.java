@@ -21,7 +21,7 @@ public class PointsCalculator {
         this.repository = repository;
     }
 
-    private void validateMemberAndAmount(String memberId, BigDecimal amount) {
+    private void validate(String memberId, BigDecimal amount) {
         if (memberId == null || memberId.isBlank()) {
             throw new IllegalArgumentException("Member id is required");
         }
@@ -52,14 +52,14 @@ public class PointsCalculator {
 
 
     public int calculatePoints(String memberId, BigDecimal amount) throws MemberNotFoundException, ArithmeticException {
-        validateMemberAndAmount(memberId, amount);
+        validate(memberId, amount);
         Member member = repository.findById(memberId);
 
         int points = applyTierMultiplier(basePoints(amount), member.getTier());
         return addBonusIfEligible(points, amount);
     }
 
-    public void displayPoints(String memberId, BigDecimal amount) throws MemberNotFoundException, ArithmeticException{
+    public void displayMemberPoints(String memberId, BigDecimal amount) throws MemberNotFoundException, ArithmeticException{
         int points = calculatePoints(memberId, amount);
         Member member = repository.findById(memberId);
         System.out.printf("Awarded %d points to %s%n", points, member.getName());
