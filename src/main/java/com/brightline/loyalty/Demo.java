@@ -1,5 +1,6 @@
 package com.brightline.loyalty;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,9 +36,9 @@ public class Demo {
             }
             PointsCalculator calculator = new PointsCalculator(memoryMemberRepository);
 
-            System.out.println("Result m1 (STANDARD), GHS 100  -> " + calculator.calculatePoints("m1", 100));
-            System.out.println("Result m2 (GOLD), GHS 250      -> " + calculator.calculatePoints("m2", 250));
-            System.out.println("Result unknown member, GHS 100 -> " + calculator.calculatePoints("unknown", 100));
+            System.out.println("Result m1 (STANDARD), GHS 100  -> " + calculator.calculatePoints("m1", BigDecimal.valueOf(100)));
+            System.out.println("Result m2 (GOLD), GHS 250      -> " + calculator.calculatePoints("m2", BigDecimal.valueOf(250)));
+            System.out.println("Result unknown member, GHS 100 -> " + calculator.calculatePoints("unknown", BigDecimal.valueOf(100)));
 
         } catch (IllegalArgumentException | DuplicateMemberException e) {
             LOG.log(Level.WARNING, e.getMessage(), e);
