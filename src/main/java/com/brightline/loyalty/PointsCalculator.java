@@ -8,6 +8,7 @@ import java.math.RoundingMode;
 import com.brightline.loyalty.member.Member;
 import com.brightline.loyalty.member.MemberNotFoundException;
 import com.brightline.loyalty.member.Tier;
+import com.brightline.loyalty.PointsAward;
 
 public class PointsCalculator {
 
@@ -51,21 +52,12 @@ public class PointsCalculator {
     }
 
 
-    public int calculatePoints(String memberId, BigDecimal amount) throws MemberNotFoundException, ArithmeticException {
+    public PointsAward calculatePoints(String memberId, BigDecimal amount) throws MemberNotFoundException, ArithmeticException {
         validate(memberId, amount);
         Member member = repository.findById(memberId);
 
         int points = applyTierMultiplier(basePoints(amount), member.getTier());
-        return addBonusIfEligible(points, amount);
-    }
-
-    public void displayMemberPoints(String memberId, BigDecimal amount) throws MemberNotFoundException, ArithmeticException{
-        int points = calculatePoints(memberId, amount);
-        Member member = repository.findById(memberId);
-        System.out.printf("Awarded %d points to %s%n", points, member.getName());
-
-        String label = String.format("Result %s (%s), GHS %s",
-                member.getId(), member.getTier(), amount);
-        System.out.printf("%-31s-> %d%n", label, points);
+        points = addBonusIfEligible(points, amount);
+        return new PointsAward(member, amount, points);
     }
 }

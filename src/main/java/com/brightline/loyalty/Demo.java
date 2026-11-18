@@ -37,14 +37,23 @@ public class Demo {
             }
             PointsCalculator calculator = new PointsCalculator(memoryMemberRepository);
 
-            calculator.displayMemberPoints("m1", BigDecimal.valueOf(100));
-            calculator.displayMemberPoints("m2", BigDecimal.valueOf(250));
-            calculator.displayMemberPoints("unknown", BigDecimal.valueOf(100));
+            displayMemberPoints(calculator.calculatePoints("m1", BigDecimal.valueOf(100)));
+            displayMemberPoints(calculator.calculatePoints("m2", BigDecimal.valueOf(250)));
+            displayMemberPoints(calculator.calculatePoints("unknown", BigDecimal.valueOf(100)));
 
         } catch (ArithmeticException | MemberNotFoundException  e) {
             LOG.log(Level.WARNING, e.getMessage());
         } catch (IllegalArgumentException | DuplicateMemberException e) {
             LOG.log(Level.SEVERE, e.getMessage(), e);
         }
+    }
+
+    private static void displayMemberPoints(PointsAward award) {
+        Member member = award.member();
+        System.out.printf("Awarded %d points to %s%n", award.points(), member.getName());
+
+        String label = String.format("Result %s (%s), GHS %s",
+                member.getId(), member.getTier(), award.amount());
+        System.out.printf("%-31s-> %d%n", label, award.points());
     }
 }
