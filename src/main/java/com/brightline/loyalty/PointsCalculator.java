@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 import com.brightline.loyalty.member.Member;
-import com.brightline.loyalty.member.Tier;
 
 public class PointsCalculator {
 
@@ -25,22 +24,10 @@ public class PointsCalculator {
 
             // base points: one point for every GHS 10 spent
             BigDecimal basePoints = amount.divide(BASE_POINT_DENOMINATOR, 0, RoundingMode.DOWN);
-            int points = 0;
-            // apply the member's tier multiplier
-            if (member.getTier().equals(Tier.STANDARD)) {
-                points = basePoints
-                        .multiply(Tier.STANDARD.multiplier())
+            
+            int points = basePoints
+                        .multiply(member.getTier().multiplier())
                         .setScale(0, RoundingMode.DOWN).intValueExact();
-            } else if (member.equals(Tier.SILVER)) {
-                points =basePoints
-                        .multiply(Tier.SILVER.multiplier())
-                        .setScale(0, RoundingMode.DOWN).intValueExact();
-            } else if (member.getTier().equals(Tier.GOLD)) {
-                points = basePoints
-                        .multiply(Tier.GOLD.multiplier())
-                        .setScale(0, RoundingMode.DOWN).intValueExact();
-            }
-
             
             // loyalty bonus for big spenders
             if (amount.compareTo(LOYALTY_BONUS_THRESHOLD) > 0) {
