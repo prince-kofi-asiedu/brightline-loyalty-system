@@ -16,7 +16,7 @@ public class InMemoryMemberRepository implements MemberRepository {
         validateMemberId(id);
         boolean memberDoesNotExist = !memberExists(id);
         if (memberDoesNotExist) {
-            throw new MemberNotFoundException("Member " + id + " does not exist");
+            throw new MemberNotFoundException("Member (" + id + ") does not exist");
         }
         Member member = members.get(id);
         return member;
@@ -26,14 +26,14 @@ public class InMemoryMemberRepository implements MemberRepository {
     public void save(Member member) throws DuplicateMemberException {
         String memberId = member.getId();
         if (memberExists(memberId)) {
-            throw new DuplicateMemberException("Member with id " + memberId + " already exists");
+            throw new DuplicateMemberException("Member (" + memberId + ") already exists");
         }
         members.put(memberId, member);
     }
 
     void validateMemberId(String id) {
         if (id == null || id.isBlank()) {
-            throw new IllegalArgumentException("id cannot be null or blank");
+            throw new IllegalArgumentException("Member id cannot be null or blank");
         }
     }
 
