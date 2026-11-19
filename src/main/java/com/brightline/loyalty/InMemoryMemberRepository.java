@@ -1,11 +1,10 @@
 package com.brightline.loyalty;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.brightline.loyalty.member.DuplicateMemberException;
 import com.brightline.loyalty.member.Member;
 import com.brightline.loyalty.member.MemberNotFoundException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class InMemoryMemberRepository implements MemberRepository {
 

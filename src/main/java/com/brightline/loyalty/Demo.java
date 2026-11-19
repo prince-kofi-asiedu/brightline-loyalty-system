@@ -1,14 +1,13 @@
 package com.brightline.loyalty;
 
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import com.brightline.loyalty.member.DuplicateMemberException;
 import com.brightline.loyalty.member.Member;
 import com.brightline.loyalty.member.MemberNotFoundException;
 import com.brightline.loyalty.member.Tier;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 // A tiny runner so you can see the calculator work before you change anything.
 public class Demo {

@@ -5,17 +5,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import com.brightline.loyalty.member.DuplicateMemberException;
+import com.brightline.loyalty.member.Member;
+import com.brightline.loyalty.member.MemberNotFoundException;
+import com.brightline.loyalty.member.Tier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
-
-import com.brightline.loyalty.member.DuplicateMemberException;
-import com.brightline.loyalty.member.Member;
-import com.brightline.loyalty.member.MemberNotFoundException;
-import com.brightline.loyalty.member.Tier;
 
 /**
  * Behaviour every {@link MemberRepository} implementation must honour.

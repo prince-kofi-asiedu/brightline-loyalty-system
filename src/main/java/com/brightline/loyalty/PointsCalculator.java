@@ -1,14 +1,11 @@
 package com.brightline.loyalty;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.Objects;
-
 import com.brightline.loyalty.member.Member;
 import com.brightline.loyalty.member.MemberNotFoundException;
 import com.brightline.loyalty.member.Tier;
-
-
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Objects;
 
 public class PointsCalculator {
 
@@ -20,6 +17,16 @@ public class PointsCalculator {
 
     public PointsCalculator(MemberRepository repository) {
         this.repository = Objects.requireNonNull(repository, "repository is required");
+    }
+
+    public PointsAward calculatePoints(String memberId, BigDecimal amount)
+            throws MemberNotFoundException, ArithmeticException {
+        validate(memberId, amount);
+        Member member = repository.findById(memberId);
+
+        int points = applyTierMultiplier(basePoints(amount), member.getTier());
+        points = addBonusIfEligible(points, amount);
+        return new PointsAward(member, amount, points);
     }
 
     private void validate(String memberId, BigDecimal amount) {
@@ -49,15 +56,5 @@ public class PointsCalculator {
 
     private boolean qualifiesForBonus(BigDecimal amount) {
         return amount.compareTo(LOYALTY_BONUS_THRESHOLD) > 0;
-    }
-
-    public PointsAward calculatePoints(String memberId, BigDecimal amount)
-            throws MemberNotFoundException, ArithmeticException {
-        validate(memberId, amount);
-        Member member = repository.findById(memberId);
-
-        int points = applyTierMultiplier(basePoints(amount), member.getTier());
-        points = addBonusIfEligible(points, amount);
-        return new PointsAward(member, amount, points);
     }
 }
