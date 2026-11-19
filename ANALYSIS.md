@@ -129,8 +129,6 @@ Demo ..> PointsCalculator : runs
 
 ## Design Rationale
 
-Every decision below is pinned by a test, so a later change that undoes it fails the build. Test names are given in brackets.
-
 ### Key refactoring decisions
 
 **1. The calculator receives its repository; it doesn't create one.**
@@ -184,11 +182,10 @@ The repository interface, its implementation and the points classes used to sit 
 | `com.brightline.loyalty.points` | `PointsCalculator`, `PointsAward` |
 | `com.brightline.loyalty` | `Demo`, which wires the two together |
 
-The repository interface now sits next to the member types it stores and the exceptions it declares, so the member domain and its storage contract are in one place. `points` depends on `member` (the calculator looks members up through `MemberRepository`), and nothing in `member` depends on `points`, so the dependency runs one way.
+The repository interface now sits next to the member types it stores and the exceptions it declares, so the member domain and its storage contract are in one place. `points` depends on `member` (the calculator looks members up through `MemberRepository`).
 
 The tests mirror the same packages. `InMemoryMemberRepositoryTest` and `MemberRepositoryContractTest` are in `member`, because the first extends the package-private contract test. `PointsCalculatorTest` and `PointsCalculatorIT` are in `points`.
 
-Unlike the decisions above, this one is not pinned by a test. Nothing yet fails the build if a class in `member` starts depending on `points`.
 
 ## How the design absorbs the coming rule change
 
