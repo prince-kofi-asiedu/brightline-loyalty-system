@@ -9,7 +9,6 @@ You need **JDK 21** and **Maven 3.6.3 or newer** (3.9.x recommended). Maven down
 ### Versions
 
 All versions are pinned in `pom.xml`, so every machine builds with the same set.
-
 | Purpose | Artifact | Version | Scope |
 |---|---|---|---|
 | Java language level | `maven.compiler.release` | 21 | — |
@@ -22,7 +21,7 @@ All versions are pinned in `pom.xml`, so every machine builds with the same set.
 | Code coverage | `org.jacoco:jacoco-maven-plugin` | 0.8.14 | build plugin |
 | Mutation testing | `org.pitest:pitest-maven` | 1.16.1 | build plugin |
 | | `org.pitest:pitest-junit5-plugin` | 1.2.1 | PIT plugin dependency |
-| Integration test runner | `org.apache.maven.plugins:maven-failsafe-plugin`| 3.2.5 (surefire.version)| build plugin |
+| Integration test runner | `org.apache.maven.plugins:maven-failsafe-plugin` | 3.2.5 (surefire.version) | build plugin |
 The application itself has no runtime dependencies.
 
 The versions live in `pom.xml` as properties:
