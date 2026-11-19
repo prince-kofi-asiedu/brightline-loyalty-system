@@ -53,14 +53,16 @@ class TierTest {
     }
 
     @Test
-    @DisplayName("a higher tier always earns more than a lower one")
+    @DisplayName("each tier earns more than the tier declared before it")
     void multipliersIncreaseWithTierRank() {
-        BigDecimal standard = Tier.STANDARD.multiplier();
-        BigDecimal silver = Tier.SILVER.multiplier();
-        BigDecimal gold = Tier.GOLD.multiplier();
-
-        assertTrue(standard.compareTo(silver) < 0, "STANDARD should earn less than SILVER");
-        assertTrue(silver.compareTo(gold) < 0, "SILVER should earn less than GOLD");
+        // Walks Tier.values(), so a tier added later is checked against its neighbour automatically
+        Tier[] tiers = Tier.values();
+        for (int i = 1; i < tiers.length; i++) {
+            Tier lower = tiers[i - 1];
+            Tier higher = tiers[i];
+            assertTrue(lower.multiplier().compareTo(higher.multiplier()) < 0,
+                    () -> lower + " should earn less than " + higher);
+        }
     }
 
     @ParameterizedTest(name = "\"{0}\" is rejected")
