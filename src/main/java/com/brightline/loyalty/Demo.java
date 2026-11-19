@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-// A tiny runner so you can see the calculator work before you change anything.
 public class Demo {
 
     private static final Logger LOG = Logger.getLogger(Demo.class.getName());
