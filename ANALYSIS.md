@@ -4,18 +4,18 @@ This file has two parts. The first records what was wrong with the original code
 **These findings describe the original code, before the refactoring.** Everything from here down to "Initial output" refers to commit `f45bb4c`, the first commit in this repository. File paths and line numbers point into that version, not the current code.
 ## Code Issues Detected (Original Code)
 
-Rank No. | Issue | Where | Root Cause | Code Smell / SOLID violated |
----| --------| ------|-----------|----------|
+| Rank No. | Issue | Where | Root Cause | Code Smell / SOLID violated |
+|---| ---| ---|---|---|
 | 1.| Silently swallowed exceptions | PointsCalculator.java:32–35 (catch block) |  The catch block returns 0 for all exceptions. Unknown members, bad tiers and code bugs all become “0 points” with no log or alert. | Swallowed exception / error hiding; overly broad catch |
-2.| High-level class creates its own low-level dependency | PointsCalculator.java:7 | new InMemoryMemberRepository() inside the class. The MemberRepository interface exists, but callers and tests can’t pass in a different one. | Dependency Inversion violation; hidden dependency; tight coupling|
-3.| Repository returns null for a missing member | Demo.java; new PointsCalculator(), InMemoryMemberRepository.java  | members.get(id) returns null, which causes a NullPointerException on getTier() that row 1 then swallows | Null return instead of a domain exception (MemberNotFoundException) |
-4.| Wrong monetary type | PointsCalculator.calculatePoints(String, double); (int) casts on lines 14 and 20 | Money held in binary floating point, and points truncated by casts, so the rounding happens by accident rather than by a stated rule | Floating point for currency; implicit or undocumented rounding |
-5.| No input validation | calculatePoints() and Member constructor| No guard clauses on amount, memberId or tier. GHS −100 gives −10 points, and Infinity gives Integer.MAX_VALUE + 50, which overflows to a negative number. | Missing guard clauses / no fail-fast |
-6.| Tier stored as a String | Member.java:6; PointsCalculator.java:17–23 | "gold", "PLATINUM" and null are all accepted. An unknown tier silently gets the 1× rate, and a null tier throws a NullPointerException that becomes 0. | Primitive obsession|
-7.| If/else chain on tier | PointsCalculator.java:17–23 | Every new tier means editing this method | Open/Closed violation; conditional on type code |
-8.| Method does more than one thing | calculatePoints() | Looks up the member, calculates, applies the bonus and prints to System.out in one method | Single Responsibility violation |
-9.| Magic numbers | PointsCalculator.java:14, 18, 20, 22, 26, 27 | 10, 1, 1.5, 2, 500 and 50 are unnamed business rules | Magic numbers which make the code difficult to understand |
-10.| Constructor hard-codes seed data | InMemoryMemberRepository.java:10–14 | Demo/test members are baked into a production class  | Hard-coded test data in production code; constructor doing real work | 
+| 2.| High-level class creates its own low-level dependency | PointsCalculator.java:7 | new InMemoryMemberRepository() inside the class. The MemberRepository interface exists, but callers and tests can’t pass in a different one. | Dependency Inversion violation; hidden dependency; tight coupling|
+| 3.| Repository returns null for a missing member | Demo.java; new PointsCalculator(), InMemoryMemberRepository.java  | members.get(id) returns null, which causes a NullPointerException on getTier() that row 1 then swallows | Null return instead of a domain exception (MemberNotFoundException) |
+| 4.| Wrong monetary type | PointsCalculator.calculatePoints(String, double); (int) casts on lines 14 and 20 | Money held in binary floating point, and points truncated by casts, so the rounding happens by accident rather than by a stated rule | Floating point for currency; implicit or undocumented rounding |
+| 5.| No input validation | calculatePoints() and Member constructor| No guard clauses on amount, memberId or tier. GHS −100 gives −10 points, and Infinity gives Integer.MAX_VALUE + 50, which overflows to a negative number. | Missing guard clauses / no fail-fast |
+| 6.| Tier stored as a String | Member.java:6; PointsCalculator.java:17–23 | "gold", "PLATINUM" and null are all accepted. An unknown tier silently gets the 1× rate, and a null tier throws a NullPointerException that becomes 0. | Primitive obsession|
+| 7.| If/else chain on tier | PointsCalculator.java:17–23 | Every new tier means editing this method | Open/Closed violation; conditional on type code |
+| 8.| Method does more than one thing | calculatePoints() | Looks up the member, calculates, applies the bonus and prints to System.out in one method | Single Responsibility violation |
+| 9.| Magic numbers | PointsCalculator.java:14, 18, 20, 22, 26, 27 | 10, 1, 1.5, 2, 500 and 50 are unnamed business rules | Magic numbers which make the code difficult to understand |
+| 10.| Constructor hard-codes seed data | InMemoryMemberRepository.java:10–14 | Demo/test members are baked into a production class  | Hard-coded test data in production code; constructor doing real work | 
 
 ## Testing Issues Detected (Original Code)
 | Rank No. | Issue | Where | Root cause | Code smell / testing anti-pattern |
