@@ -1,6 +1,5 @@
 package com.brightline.loyalty.member;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -48,15 +47,6 @@ class MemberTest {
         Tier actual = member.getTier();
 
         assertEquals(tier, actual);
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @EnumSource(Tier.class)
-    @DisplayName("accepts every tier")
-    void constructorAcceptsEveryTier(Tier tier) {
-        Member member = assertDoesNotThrow(() -> new Member(VALID_ID, VALID_NAME, tier));
-
-        assertEquals(tier, member.getTier());
     }
 
     @Test
