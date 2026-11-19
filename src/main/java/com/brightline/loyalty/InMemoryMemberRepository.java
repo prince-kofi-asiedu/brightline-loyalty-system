@@ -13,8 +13,7 @@ public class InMemoryMemberRepository implements MemberRepository {
     @Override
     public Member findById(String id) throws MemberNotFoundException {
         validateMemberId(id);
-        boolean memberDoesNotExist = !memberExists(id);
-        if (memberDoesNotExist) {
+        if (!memberExists(id)) {
             throw new MemberNotFoundException("Member (" + id + ") does not exist");
         }
         Member member = members.get(id);
