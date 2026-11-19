@@ -22,6 +22,7 @@ All versions are pinned in `pom.xml`, so every machine builds with the same set.
 | Mutation testing | `org.pitest:pitest-maven` | 1.16.1 | build plugin |
 | | `org.pitest:pitest-junit5-plugin` | 1.2.1 | PIT plugin dependency |
 | Integration test runner | `org.apache.maven.plugins:maven-failsafe-plugin` | 3.2.5 (surefire.version) | build plugin |
+
 The application itself has no runtime dependencies.
 
 The versions live in `pom.xml` as properties:
@@ -36,6 +37,8 @@ The versions live in `pom.xml` as properties:
     <pitest.version>1.16.1</pitest.version>
     <pitest.junit5.version>1.2.1</pitest.junit5.version>
     <surefire.version>3.2.5</surefire.version>
+    <coverage.minimum>1.00</coverage.minimum>
+    <mutation.threshold>100</mutation.threshold>
 </properties>
 
 <dependencyManagement>
