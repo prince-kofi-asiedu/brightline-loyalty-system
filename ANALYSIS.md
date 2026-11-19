@@ -2,10 +2,11 @@
 This file has two parts. The first records what was wrong with the original code (its smells, anti-patterns and SOLID violations) and which of the original AI-generated tests passed without really testing anything, each ranked by what matters most. The second describes the refactored design and the reasoning behind it.
 
 **These findings describe the original code, before the refactoring.** Everything from here down to "Initial output" refers to commit `f45bb4c`, the first commit in this repository. File paths and line numbers point into that version, not the current code.
+
 ## Code Issues Detected (Original Code)
 
 | Rank No. | Issue | Where | Root Cause | Code Smell / SOLID violated |
-|---| ---| ---|---|---|
+|---|---|---|---|---|
 | 1.| Silently swallowed exceptions | PointsCalculator.java:32–35 (catch block) |  The catch block returns 0 for all exceptions. Unknown members, bad tiers and code bugs all become “0 points” with no log or alert. | Swallowed exception / error hiding; overly broad catch |
 | 2.| High-level class creates its own low-level dependency | PointsCalculator.java:7 | new InMemoryMemberRepository() inside the class. The MemberRepository interface exists, but callers and tests can’t pass in a different one. | Dependency Inversion violation; hidden dependency; tight coupling|
 | 3.| Repository returns null for a missing member | Demo.java; new PointsCalculator(), InMemoryMemberRepository.java  | members.get(id) returns null, which causes a NullPointerException on getTier() that row 1 then swallows | Null return instead of a domain exception (MemberNotFoundException) |
@@ -238,3 +239,23 @@ Passing tests aren't enough: the original suite passed while testing nothing. So
 - **PIT:** 100% of mutants are killed, which catches code that tests run but don't check.
 
 **Value.** The points rules are all boundaries (the GHS 500 threshold, rounding order, bonus after multiplier), which is exactly where PIT's mutations land. When the new tier's rules arrive, they must be tested and checked before the build passes, without anyone having to remember.
+
+## Final Program Output
+```
+Awarded 10 points to Kofi Mensah
+Result m1 (STANDARD), GHS 100  -> 10
+Awarded 50 points to Ama Owusu
+Result m2 (GOLD), GHS 250      -> 50
+2026-11-19 16:01:50 WARNING com.brightline.loyalty.Demo - Member (unknown) does not exist
+com.brightline.loyalty.member.MemberNotFoundException: Member (unknown) does not exist
+        at com.brightline.loyalty.member.InMemoryMemberRepository.findById(InMemoryMemberRepository.java:15)
+        at com.brightline.loyalty.points.PointsCalculator.calculatePoints(PointsCalculator.java:26)
+        at com.brightline.loyalty.Demo.main(Demo.java:42)
+        at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+        at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+        at org.codehaus.mojo.exec.AbstractExecJavaBase.executeMainMethod(AbstractExecJavaBase.java:478)
+        at org.codehaus.mojo.exec.ExecJavaMojo.executeMainMethod(ExecJavaMojo.java:142)
+        at org.codehaus.mojo.exec.AbstractExecJavaBase.doExecClassLoader(AbstractExecJavaBase.java:453)
+        at org.codehaus.mojo.exec.AbstractExecJavaBase.lambda$execute$0(AbstractExecJavaBase.java:317)
+        at java.base/java.lang.Thread.run(Thread.java:1474)
+```
