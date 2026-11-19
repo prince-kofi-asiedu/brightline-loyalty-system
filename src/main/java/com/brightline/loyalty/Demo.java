@@ -42,7 +42,7 @@ public class Demo {
             displayMemberPoints(calculator.calculatePoints("unknown", BigDecimal.valueOf(100)));
 
         } catch (ArithmeticException | MemberNotFoundException e) {
-            LOG.log(Level.WARNING, e.getMessage());
+            LOG.log(Level.WARNING, e.getMessage(), e);
         } catch (IllegalArgumentException | DuplicateMemberException e) {
             LOG.log(Level.SEVERE, e.getMessage(), e);
         }
