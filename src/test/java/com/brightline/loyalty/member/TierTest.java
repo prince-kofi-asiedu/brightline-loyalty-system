@@ -25,10 +25,9 @@ class TierTest {
     })
     @DisplayName("multiplier matches the loyalty scheme's rate")
     void multiplierMatchesSchemeRate(Tier tier, BigDecimal expectedMultiplier) {
-        // Act
+
         BigDecimal actual = tier.multiplier();
 
-        // Assert: compareTo ignores scale, so 2 and 2.0 are treated as the same rate
         assertEquals(0, expectedMultiplier.compareTo(actual),
                 () -> tier + " multiplier should be " + expectedMultiplier + " but was " + actual);
     }
