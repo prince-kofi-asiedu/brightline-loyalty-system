@@ -17,6 +17,9 @@
         <pitest.version>1.16.1</pitest.version>
         <pitest.junit5.version>1.2.1</pitest.junit5.version>
         <surefire.version>3.2.5</surefire.version>
+        <!-- Quality gates enforced by mvn verify (AmaliTech standard §9) -->
+        <coverage.minimum>1.00</coverage.minimum>
+        <mutation.threshold>100</mutation.threshold>
     </properties>
 
     <dependencyManagement>

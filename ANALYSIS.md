@@ -54,77 +54,70 @@ Result unknown member, GHS 100 -> 0
 
 ```mermaid
 classDiagram
-class Member {
-    -id: string
-    -name: string
+  class Member {
+    -id: String
+    -name: String
     -tier: Tier
-    +getId()
-    +getName()
+    +getId() String
+    +getName() String
     +getTier() Tier
-}
+  }
 
-
-class Tier {
+  class Tier {
     <<enumeration>>
     STANDARD
     SILVER
     GOLD
-    -multiplier: double
-    +multiplier() double
-}
+    -multiplier: BigDecimal
+    +multiplier() BigDecimal
+  }
 
-
-class MemberRepository {
-    <<Interface>>
+  class MemberRepository {
+    <<interface>>
     +save(member: Member)
-    +findById() Member
-}
+    +findById(id: String) Member
+  }
 
-
-class InMemoryMemberRepository {
+  class InMemoryMemberRepository {
     -members: Map~String, Member~
     +save(member: Member)
-    +findById() Member
-}
+    +findById(id: String) Member
+  }
 
+  class MemberNotFoundException
+  class DuplicateMemberException
 
-class MemberNotFoundException {
-    -memberId: string
-}
+  class PointsAward {
+    <<record>>
+    member: Member
+    amount: BigDecimal
+    points: int
+  }
 
-
-class DuplicateMemberException {
-    +DuplicateMemberException(errMessage: string)
-}
-
-
-class PointsCalculator {
+  class PointsCalculator {
     -repository: MemberRepository
     +PointsCalculator(repository: MemberRepository)
-    -basePoints() BigDecimal
-    -validate()
-    -applyTierMultiplier() int
-    -addBonusIfEligible() int
-    -qualifiesForBonus() boolean
-    +calculatePoints() int
-    +displayMemberPoints()
-    
-}
+    +calculatePoints(memberId: String, amount: BigDecimal) PointsAward
+    -validate(memberId: String, amount: BigDecimal)
+    -basePoints(amount: BigDecimal) BigDecimal
+    -applyTierMultiplier(basePoints: BigDecimal, tier: Tier) int
+    -addBonusIfEligible(points: int, amount: BigDecimal) int
+    -qualifiesForBonus(amount: BigDecimal) boolean
+  }
 
+  class Demo {
+    +main(args: String[])
+  }
 
-Member "0..*" --> "1" Tier : has
-
-
-MemberRepository <|.. InMemoryMemberRepository : implements
-MemberRepository ..> Member : save() / findById()
-MemberRepository ..> MemberNotFoundException : throws
-MemberRepository ..> DuplicateMemberException : throws
+  Member "0..*" --> "1" Tier : has
+  MemberRepository <|.. InMemoryMemberRepository : implements
+  MemberRepository ..> MemberNotFoundException : throws
+  MemberRepository ..> DuplicateMemberException : throws
 InMemoryMemberRepository "1" o-- "0..*" Member : stores
-
-
 PointsCalculator "1" --> "1" MemberRepository : injected via constructor
-PointsCalculator ..> Member : reads tier
+PointsCalculator ..> PointsAward : returns
 PointsCalculator ..> Tier : uses multiplier()
+Demo ..> PointsCalculator : runs
 ```
 
 ## Design Rationale
@@ -216,3 +209,13 @@ Passing tests aren't enough: the original suite passed while testing nothing. So
 - **PIT mutation testing:** PIT changes the production code (for example flipping `>` to `>=` on the bonus threshold) and reruns the tests. Every mutant outside `Demo` was killed, so each tested line has an assertion that fails when the logic is wrong.
 
 `mvn verify` runs 103 unit tests and 9 integration tests, all passing.
+
+## Improvement beyond the brief: quality gates in the build
+
+**Problem.** The original AI tests were green and would have shown decent coverage, yet proved nothing. The new suite is meaningful today, but nothing stops it decaying the same way when the next engineer adds the new tier with a weak test.
+
+**What I added.** `mvn verify` now fails unless:
+- **JaCoCo:** 100% of lines and branches are covered, which catches code no test runs.
+- **PIT:** 100% of mutants are killed, which catches code that tests run but don't check.
+
+**Value.** The points rules are all boundaries (the GHS 500 threshold, rounding order, bonus after multiplier), which is exactly where PIT's mutations land. When the new tier's rules arrive, they must be tested and checked before the build passes, without anyone having to remember.
