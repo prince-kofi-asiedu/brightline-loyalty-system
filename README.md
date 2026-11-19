@@ -91,9 +91,15 @@ mvn test
 
 **Measure your tests** (coverage and mutation testing)
 
+`mvn verify` runs the unit and integration tests, then two quality gates. The build fails unless both pass:
+
+- **JaCoCo:** 100% of lines and branches are covered.
+- **PIT:** 100% of mutants are killed.
+
+`Demo` is a manual runner with no tests, so both gates exclude it. The thresholds are the `coverage.minimum` and `mutation.threshold` properties in `pom.xml`.
+
 ```bash
-mvn verify                                                  # tests + JaCoCo report: target/site/jacoco/index.html
-mvn test-compile org.pitest:pitest-maven:mutationCoverage   # PIT report: target/pit-reports/index.html
+mvn verify                                                  # tests + coverage gate + mutation gate
+mvn verify -DskipPitest                                     # quicker local run: skips PIT and its gate
+mvn test-compile org.pitest:pitest-maven:mutationCoverage   # PIT on its own
 ```
-
-
