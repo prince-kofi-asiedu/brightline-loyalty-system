@@ -1,6 +1,5 @@
 package com.brightline.loyalty.member;
 
-
 public class Member {
     private final String id;
     private final String name;
