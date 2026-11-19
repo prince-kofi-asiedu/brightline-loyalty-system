@@ -1,5 +1,8 @@
 # Analysis.md
-This file contains what is actually wrong with the code (its smells, anti-patterns, and SOLID violations) and, separately, spots which of the AI-generated tests pass without really testing anything, ranked by what matters most.
+This file has two parts. The first records what was wrong with the original code (its smells, anti-patterns and SOLID violations) and which of the original AI-generated tests passed without really testing anything, each ranked by what matters most. The second describes the refactored design and the reasoning behind it.
+
+**These findings describe the original code, before the refactoring.** Everything from here down to "Initial output" refers to commit `f45bb4c`, the first commit in this repository. File paths and line numbers point into that version, not the current code.
+## Code Issues Detected (Original Code)
 
 Rank No. | Issue | Where | Root Cause | Code Smell / SOLID violated |
 ---| --------| ------|-----------|----------|
@@ -14,7 +17,7 @@ Rank No. | Issue | Where | Root Cause | Code Smell / SOLID violated |
 9.| Magic numbers | PointsCalculator.java:14, 18, 20, 22, 26, 27 | 10, 1, 1.5, 2, 500 and 50 are unnamed business rules | Magic numbers which make the code difficult to understand |
 10.| Constructor hard-codes seed data | InMemoryMemberRepository.java:10–14 | Demo/test members are baked into a production class  | Hard-coded test data in production code; constructor doing real work | 
 
-## Testing Issues Detected
+## Testing Issues Detected (Original Code)
 | Rank No. | Issue | Where | Root cause | Code smell / testing anti-pattern |
 |---|---|---|---|---|
 | 1. | Test mocks the class it is testing | `PointsCalculatorTest.calculatesGoldPoints` (lines 20–22) | Stubs `calculatePoints` to return 50, then asserts 50. No production code runs, so it passes even if the logic is broken. | Mocking the class under test (a self-fulfilling test); false confidence because 50 is the correct GOLD value |
@@ -31,7 +34,7 @@ Rank No. | Issue | Where | Root Cause | Code Smell / SOLID violated |
 | 12. | Wildcard imports | `PointsCalculatorTest.java:5–6` | `Assertions.*` and `Mockito.*` hide where each method comes from | Readability/style nit (not a SOLID violation) |
 
 
-## Which AI-Generated Test Passes without Testing Anything
+## Which AI-Generated Test Pass without Testing Anything
 ```calculatesGoldPoints()```: It mocks the method instead and returns a value. So the branch for computing the points for Gold tier is actually never tested.
 
 ## Which Problem is the Most Serious for this Code and Why
