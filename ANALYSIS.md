@@ -227,7 +227,7 @@ Passing tests aren't enough: the original suite passed while testing nothing. So
 - **JaCoCo:** every line and branch of `PointsCalculator`, `Member`, `Tier`, `InMemoryMemberRepository` and the exceptions is covered. `Demo` is a manual runner and has no unit tests.
 - **PIT mutation testing:** PIT changes the production code (for example flipping `>` to `>=` on the bonus threshold) and reruns the tests. Every mutant outside `Demo` was killed (100% in both the `member` and `points` packages), so each tested line has an assertion that fails when the logic is wrong.
 
-`mvn verify` runs 103 unit tests and 9 integration tests, all passing.
+`mvn verify` runs 100 unit tests and 9 integration tests, all passing.
 
 ## Improvement beyond the brief: quality gates in the build
 
