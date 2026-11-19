@@ -118,7 +118,7 @@ abstract class MemberRepositoryContractTest {
     @Test
     @DisplayName("save rejects a null member")
     void saveWithNullMemberIsRejected() {
-        // Records current behaviour; a guard such as Objects.requireNonNull would make this explicit
-        assertThrows(NullPointerException.class, () -> repository.save(null));
+        NullPointerException exception = assertThrows(NullPointerException.class, () -> repository.save(null));
+        assertEquals("member is required", exception.getMessage());
     }
 }

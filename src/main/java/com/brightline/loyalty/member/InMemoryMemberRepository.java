@@ -2,6 +2,7 @@ package com.brightline.loyalty.member;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class InMemoryMemberRepository implements MemberRepository {
 
@@ -19,6 +20,7 @@ public class InMemoryMemberRepository implements MemberRepository {
 
     @Override
     public void save(Member member) throws DuplicateMemberException {
+        Objects.requireNonNull(member, "member is required");
         String memberId = member.getId();
         if (memberExists(memberId)) {
             throw new DuplicateMemberException("Member (" + memberId + ") already exists");
