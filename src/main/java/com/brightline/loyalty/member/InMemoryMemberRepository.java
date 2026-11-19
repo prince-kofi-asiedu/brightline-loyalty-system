@@ -30,7 +30,7 @@ public class InMemoryMemberRepository implements MemberRepository {
 
     private void validateMemberId(String id) {
         if (id == null || id.isBlank()) {
-            throw new IllegalArgumentException("Member id cannot be null or blank");
+            throw new IllegalArgumentException("Member id is required");
         }
     }
 

@@ -36,6 +36,6 @@ class InMemoryMemberRepositoryTest extends MemberRepositoryContractTest {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> repository.findById(id));
 
-        assertEquals("Member id cannot be null or blank", exception.getMessage());
+        assertEquals("Member id is required", exception.getMessage());
     }
 }
