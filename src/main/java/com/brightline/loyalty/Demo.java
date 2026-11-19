@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.lang.ArithmeticException;
 
 import com.brightline.loyalty.member.DuplicateMemberException;
 import com.brightline.loyalty.member.Member;
@@ -41,7 +40,7 @@ public class Demo {
             displayMemberPoints(calculator.calculatePoints("m2", BigDecimal.valueOf(250)));
             displayMemberPoints(calculator.calculatePoints("unknown", BigDecimal.valueOf(100)));
 
-        } catch (ArithmeticException | MemberNotFoundException  e) {
+        } catch (ArithmeticException | MemberNotFoundException e) {
             LOG.log(Level.WARNING, e.getMessage());
         } catch (IllegalArgumentException | DuplicateMemberException e) {
             LOG.log(Level.SEVERE, e.getMessage(), e);
