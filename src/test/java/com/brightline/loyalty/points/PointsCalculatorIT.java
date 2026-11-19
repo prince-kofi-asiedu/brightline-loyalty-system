@@ -1,16 +1,16 @@
-package com.brightline.loyalty;
+package com.brightline.loyalty.points;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.brightline.loyalty.member.*;
-
+import com.brightline.loyalty.member.MemberNotFoundException;
+import com.brightline.loyalty.member.Member;
+import com.brightline.loyalty.member.Tier;
+import com.brightline.loyalty.member.DuplicateMemberException;
+import com.brightline.loyalty.member.InMemoryMemberRepository;
 import java.math.BigDecimal;
-
-import com.brightline.loyalty.points.PointsAward;
-import com.brightline.loyalty.points.PointsCalculator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

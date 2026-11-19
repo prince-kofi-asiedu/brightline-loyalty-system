@@ -1,9 +1,4 @@
-package com.brightline.loyalty;
-
-import com.brightline.loyalty.member.DuplicateMemberException;
-import com.brightline.loyalty.member.Member;
-import com.brightline.loyalty.member.MemberNotFoundException;
-import com.brightline.loyalty.member.MemberRepository;
+package com.brightline.loyalty.member;
 
 import java.util.HashMap;
 import java.util.Map;

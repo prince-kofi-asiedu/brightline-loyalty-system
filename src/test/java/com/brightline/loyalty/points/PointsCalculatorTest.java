@@ -1,4 +1,4 @@
-package com.brightline.loyalty;
+package com.brightline.loyalty.points;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -14,8 +14,6 @@ import com.brightline.loyalty.member.MemberRepository;
 import com.brightline.loyalty.member.Tier;
 import java.math.BigDecimal;
 
-import com.brightline.loyalty.points.PointsAward;
-import com.brightline.loyalty.points.PointsCalculator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

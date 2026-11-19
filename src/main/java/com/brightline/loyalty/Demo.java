@@ -1,9 +1,8 @@
 package com.brightline.loyalty;
 
-import com.brightline.loyalty.member.DuplicateMemberException;
-import com.brightline.loyalty.member.Member;
-import com.brightline.loyalty.member.MemberNotFoundException;
-import com.brightline.loyalty.member.Tier;
+import com.brightline.loyalty.member.*;
+import com.brightline.loyalty.points.PointsAward;
+import com.brightline.loyalty.points.PointsCalculator;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.logging.Level;

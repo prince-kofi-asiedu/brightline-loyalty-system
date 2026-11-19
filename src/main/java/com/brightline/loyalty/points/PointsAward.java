@@ -1,4 +1,4 @@
-package com.brightline.loyalty;
+package com.brightline.loyalty.points;
 
 import com.brightline.loyalty.member.Member;
 import java.math.BigDecimal;
