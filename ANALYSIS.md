@@ -127,43 +127,93 @@ PointsCalculator ..> Member : reads tier
 PointsCalculator ..> Tier : uses multiplier()
 ```
 
-
 ## Design Rationale
+
+Every decision below is pinned by a test, so a later change that undoes it fails the build. Test names are given in brackets.
+
 ### Key refactoring decisions
 
 **1. The calculator receives its repository; it doesn't create one.**
-`PointsCalculator` used to create `new InMemoryMemberRepository()` inside itself, even though a `MemberRepository` interface already existed. It now takes a `MemberRepository` through its constructor. The calculator depends only on the interface (Dependency Inversion), so each test can pass in a repository it controls instead of relying on hidden seed data.
+`PointsCalculator` used to create `new InMemoryMemberRepository()` inside itself. It now takes a `MemberRepository` through its constructor (Dependency Inversion), and rejects `null` there (`constructorWithNullRepositoryFailsFast`). Unit tests pass in a Mockito mock of the interface, so they control exactly which member is returned and can check that the calculator looks a member up once and never saves (`looksUpMemberExactlyOnce`).
 
-**2. The caller creates the members; the repository starts empty.**
-The repository used to fill itself with `m1`, `m2` and `m3` in its constructor. A test couldn't see which tier `"m2"` was without opening another class. Now the caller creates members and stores them with `save()`. Each test sets up exactly the members it uses, in plain view, and gets a new repository so tests can't affect each other.
+**2. The repository starts empty, and callers add members with `save()`.**
+The repository used to seed `m1`, `m2` and `m3` in its constructor, so a test couldn't see a member's tier without opening another class. Each test now creates the members it needs, in plain view, with descriptive IDs such as `"gold-member"`. `save()` rejects a duplicate ID with `DuplicateMemberException` and keeps the original member, so a second save can't silently change a member's tier (`saveWithDuplicateIdKeepsOriginalMember`, `calculatePointsAfterRejectedDuplicateSaveUsesOriginalTier`).
 
 **3. Failures are reported, not hidden.**
-The original code wrapped everything in `catch (Exception e) { return 0; }`. An unknown member, a bad tier and a real bug all came out as "0 points," with no error. This was the most serious defect, because it gave customers wrong balances and nobody could see it happening. The changes:
-- `findById()` throws `MemberNotFoundException` instead of returning `null`. The exception is part of the `MemberRepository` interface's contract, so every implementation must keep it, including a future database repository, and no caller ever has to check for `null`.
-- The catch-all block is gone. A failure now reaches the caller, which can decide how to handle it.
+The original `catch (Exception e) { return 0; }` turned an unknown member, a bad tier and a real bug into "0 points". This was the most serious defect. Now:
+- `findById()` throws `MemberNotFoundException` naming the missing ID instead of returning `null`. It is a checked exception (`domainExceptionsAreChecked`), so every caller has to deal with it.
+- The calculator has no catch block. A not-found exception reaches the caller unchanged (`whenMemberNotFoundPropagatesMemberNotFoundException`), and so does any unexpected repository failure (`whenRepositoryThrowsRuntimeExceptionPropagatesIt`).
+- Bad input fails before the repository is touched: a null or blank ID, or a null or negative amount, throws `IllegalArgumentException` (`Validation` tests use `verifyNoInteractions(repository)`).
 
 **4. The tier is an enum that holds its own multiplier.**
-Tiers used to be free-text strings checked by an `if/else` chain. A typo such as `"gold"` matched no branch and silently earned ×1. `Tier` is now an enum, and each constant stores its multiplier (`STANDARD(1.0)`, `SILVER(1.5)`, `GOLD(2.0)`). The calculator looks up `member.getTier().multiplier()` instead of branching on a string. An invalid tier can't be represented, and the calculator has one path through it instead of three.
+Tiers used to be strings checked by an `if/else` chain, so `"gold"` silently earned ×1. `Tier` is now an enum, and each constant stores its multiplier as a `BigDecimal` (`STANDARD("1")`, `SILVER("1.5")`, `GOLD("2")`). The calculator calls `member.getTier().multiplier()` instead of branching. A misspelt tier can't be created (`valueOfIsCaseSensitive` rejects `"gold"`, `" GOLD"` and `"PLATINUM"`), and a `Member` can't be built with a null tier.
 
-I considered `Member` subclasses (`GoldMember`, `SilverMember`) and rejected them:
-- The tiers differ by one number, not by behaviour, so three classes would add structure without adding meaning.
-- A member's tier would be fixed by their class, so upgrading a member would mean replacing the object.
-- Keeping a subclass *and* a tier value would store the same fact twice, and the two could disagree.
+I considered `Member` subclasses (`GoldMember`, `SilverMember`) and rejected them. The tiers differ by one number, not by behaviour; upgrading a member would mean replacing the object; and a subclass plus a tier field would store the same fact twice.
 
-**5. Each class has one job.**
+**5. Money is `BigDecimal`, and every rounding rule is explicit and tested.**
+`double` amounts and `(int)` casts made the rounding accidental. Each rule is now stated in code and fixed by a test:
+
+| Rule | Test |
+|---|---|
+| One point per GHS 10, rounded down (GHS 99.99 → 9) | `forStandardMemberAwardsOnePointPerTenCedisRoundedDown` |
+| Base points are rounded down *before* the multiplier (SILVER, GHS 19.99 → 1, not 2) | `truncatesBaseBeforeApplyingMultiplier` |
+| Fractional points are dropped (SILVER, GHS 150 → 22) | `forSilverTruncatesFractionalPoints` |
+| The bonus needs *more than* GHS 500, whatever the scale (`500.000` gets no bonus) | `atExactlyThresholdDoesNotAddBonus` |
+| The bonus is added after the multiplier (GOLD, GHS 600 → 170, not 220) | `bonusIsAddedAfterMultiplierNotMultiplied` |
+| Points that don't fit in an `int` throw instead of wrapping negative | `Overflow` tests |
+
+The rule values live in named constants (`BASE_POINT_DENOMINATOR`, `LOYALTY_BONUS_THRESHOLD`, `LOYALTY_BONUS_POINTS`).
+
+**6. The calculator returns a result; it doesn't print.**
+`calculatePoints` used to print to `System.out` and return a bare `int`. It now returns a `PointsAward` record holding the member, the original amount and the points (`Award` tests), and `Demo` decides how to display it. The calculator has one job: applying the points rules.
 
 | Class | Responsibility |
 |---|---|
-| `PointsCalculator` | Applies the points rules. It no longer prints to the console; it returns a result and the caller decides what to do with it. |
-| `MemberRepository` | Stores and finds members. |
-| `Member` | Holds a member's identity and tier. |
-| `Tier` | Knows each tier's multiplier. |
+| `PointsCalculator` | Applies the points rules and returns a `PointsAward` |
+| `MemberRepository` | Stores and finds members; its contract is defined by `MemberRepositoryContractTest` |
+| `Member` | Holds a valid member's identity and tier |
+| `Tier` | Knows each tier's multiplier |
+| `Demo` | Seeds sample members and prints the results |
 
 ## How the design absorbs the coming rule change
 
-Brightline is about to add a new tier. Under this design:
+Brightline is about to add a new tier.
 
-- **If the new tier differs only by multiplier,** adding it is one line in `Tier`, for example `PLATINUM(3.0)`. `PointsCalculator`, `Member` and the repository don't change (Open/Closed). The tests change by one row in the parameterized tier test.
-- **If the new tier has rules of its own,** such as a different bonus, the change is still small. `Tier` gets one method that applies a tier's rules, for example `applyTo(basePoints, amount)`. The calculator calls that method instead of `multiplier()`, which is a one-line change. Java lets a single enum constant override a method with its own body, so `PLATINUM` can define its own rules while the other tiers keep the shared ones. The existing tiers don't change.
+- **If the new tier differs only by multiplier,** the production change is one line in `Tier`, for example `PLATINUM("3")`. `PointsCalculator`, `Member` and the repository don't change (Open/Closed). The tests guide the rest:
+  - `definesExactlyThreeTiers` fails on purpose. Its comment says to add the new tier's row to `multiplierMatchesSchemeRate`, so the new rate can't ship untested.
+  - `multipliersIncreaseWithTierRank` checks that the new tier earns more than the one below it.
+  - The `@EnumSource(Tier.class)` tests in `TierTest` and `MemberTest` cover the new tier automatically.
+- **If the new tier has rules of its own,** such as a different bonus, `Tier` gets one method that applies a tier's rules, for example `applyTo(basePoints, amount)`, and the calculator calls it instead of `multiplier()`. A single enum constant can override that method with its own body, so only the new tier carries the new rule. The existing `Bonus` and `TierMultiplier` tests then prove the other tiers didn't change.
+- **If the bonus threshold or amount changes,** it changes in one constant, and the `Bonus` boundary tests (GHS 499.99, 500, 500.01) show exactly which results move.
+- **If members move to a database,** the new repository gets its own subclass of `MemberRepositoryContractTest`, which runs the same behaviour checks the in-memory version passes. The calculator doesn't change.
 
+## What I kept, fixed and rewrote
 
+### Production code
+
+| Original | Decision | Why |
+|---|---|---|
+| `MemberRepository` interface | **Kept and extended** | The abstraction was right but unused. Added `save()`, and declared `MemberNotFoundException` and `DuplicateMemberException` so every implementation shares the same failure contract. |
+| `InMemoryMemberRepository` | **Fixed** | Kept the `HashMap` storage. Removed the hard-coded seed data, replaced the `null` return with `MemberNotFoundException`, and added ID validation and the duplicate check. |
+| `Member` | **Fixed** | Kept its shape (ID, name, tier, getters). Changed the tier from `String` to `Tier`, and made the constructor reject a null tier and a null or blank ID or name. |
+| `PointsCalculator` | **Rewrote** | Almost every line had a defect: a self-created dependency, `double` money, the string `if/else` chain, the catch-all, printing and magic numbers. Only the business rules carried over, and each is now pinned by a test. |
+| `Demo` | **Kept and fixed** | Still a runner for seeing the calculator work. It now creates its own members and does the printing that used to be in the calculator. |
+
+### Tests
+
+| Original test | Problem | Decision |
+|---|---|---|
+| `calculatesGoldPoints` | Mocked `PointsCalculator` itself, then asserted the value it had just stubbed. No production code ran. | **Rewrote.** The mock now stands in for the *repository*, and the real calculator computes GOLD at GHS 250 → 50 (`appliesTierMultiplier`). |
+| `awardsPointsToAMember` | `assertTrue(points > 0)` passes for any positive value. | **Fixed.** Exact values replace it: STANDARD at GHS 100 → exactly 10, with boundaries either side (`BasePoints` tests). |
+| `awardsPointsForAPurchase` | `assertNotNull` on an `int` can never fail, and the SILVER ×1.5 was never checked. | **Fixed.** SILVER at GHS 200 → exactly 30, and GHS 150 → 22 for the rounding case (`TierMultiplier` tests). |
+| Mockito dependency | Used to mock the class under test. | **Kept,** but only to mock the calculator's collaborator. |
+
+Tests added for behaviour the original suite never checked: unknown members, invalid input, the bonus boundary, rounding order and overflow (`PointsCalculatorTest`); valid and invalid tiers (`TierTest`); member validation (`MemberTest`); the domain exceptions (`DomainExceptionsTest`); the repository contract (`MemberRepositoryContractTest`, run by `InMemoryMemberRepositoryTest`); and the real calculator and repository working together (`PointsCalculatorIT`).
+
+### How I checked the tests are meaningful
+
+Passing tests aren't enough: the original suite passed while testing nothing. So the suite was checked in two ways:
+- **JaCoCo:** every line and branch of `PointsCalculator`, `Member`, `Tier`, `InMemoryMemberRepository` and the exceptions is covered. `Demo` is a manual runner and has no unit tests.
+- **PIT mutation testing:** PIT changes the production code (for example flipping `>` to `>=` on the bonus threshold) and reruns the tests. Every mutant outside `Demo` was killed, so each tested line has an assertion that fails when the logic is wrong.
+
+`mvn verify` runs 103 unit tests and 9 integration tests, all passing.
