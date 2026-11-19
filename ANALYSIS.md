@@ -185,7 +185,6 @@ Brightline is about to add a new tier.
   - The `@EnumSource(Tier.class)` tests in `TierTest` and `MemberTest` cover the new tier automatically.
 - **If the new tier has rules of its own,** such as a different bonus, `Tier` gets one method that applies a tier's rules, for example `applyTo(basePoints, amount)`, and the calculator calls it instead of `multiplier()`. A single enum constant can override that method with its own body, so only the new tier carries the new rule. The existing `Bonus` and `TierMultiplier` tests then prove the other tiers didn't change.
 - **If the bonus threshold or amount changes,** it changes in one constant, and the `Bonus` boundary tests (GHS 499.99, 500, 500.01) show exactly which results move.
-- **If members move to a database,** the new repository gets its own subclass of `MemberRepositoryContractTest`, which runs the same behaviour checks the in-memory version passes. The calculator doesn't change.
 
 ## What I kept, fixed and rewrote
 
