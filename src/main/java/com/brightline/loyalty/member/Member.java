@@ -8,7 +8,7 @@ public class Member {
 
     public Member(String id, String name, Tier tier) {
         if (tier == null) {
-            throw new IllegalArgumentException("Tier cannot be null or blank");
+            throw new IllegalArgumentException("Tier is required");
         }
 
         if (id == null || id.isBlank()) {

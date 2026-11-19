@@ -65,7 +65,7 @@ class MemberTest {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> new Member(VALID_ID, VALID_NAME, null));
 
-        assertEquals("Tier cannot be null or blank", exception.getMessage());
+        assertEquals("Tier is required", exception.getMessage());
     }
 
     @ParameterizedTest(name = "id = \"{0}\"")
