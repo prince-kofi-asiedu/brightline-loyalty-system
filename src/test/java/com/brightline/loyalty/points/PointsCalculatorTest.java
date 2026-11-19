@@ -72,9 +72,9 @@ class PointsCalculatorTest {
         @Test
         @DisplayName("rejects a null amount before looking anything up")
         void withNullAmountThrowsIllegalArgumentException() {
-            assertThrows(IllegalArgumentException.class,
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                     () -> calculator.calculatePoints(MEMBER_ID, null));
-
+            assertEquals("Amount is required", exception.getMessage());
             verifyNoInteractions(repository);
         }
 
@@ -82,9 +82,10 @@ class PointsCalculatorTest {
         @ValueSource(strings = {"-0.01", "-100"})
         @DisplayName("rejects a negative amount before looking anything up")
         void withNegativeAmountThrowsIllegalArgumentException(String amount) {
-            assertThrows(IllegalArgumentException.class,
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                     () -> calculator.calculatePoints(MEMBER_ID, new BigDecimal(amount)));
-
+            assertEquals("Amount must be zero or more, but was " + amount,
+                    exception.getMessage());
             verifyNoInteractions(repository);
         }
 

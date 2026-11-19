@@ -35,8 +35,12 @@ public class PointsCalculator {
             throw new IllegalArgumentException("Member id is required");
         }
 
-        if (amount == null || amount.signum() < 0) {
-            throw new IllegalArgumentException("Amount must be zero or more " + amount);
+        if(amount == null) {
+            throw new IllegalArgumentException("Amount is required");
+        }
+
+        if (amount.signum() < 0) {
+            throw new IllegalArgumentException("Amount must be zero or more, but was " + amount);
         }
     }
 
