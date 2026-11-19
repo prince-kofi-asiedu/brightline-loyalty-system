@@ -54,55 +54,59 @@ Result unknown member, GHS 100 -> 0
 
 ```mermaid
 classDiagram
-  class Member {
-    -id: String
-    -name: String
-    -tier: Tier
-    +getId() String
-    +getName() String
-    +getTier() Tier
+  namespace member {
+    class Member {
+      -id: String
+      -name: String
+      -tier: Tier
+      +getId() String
+      +getName() String
+      +getTier() Tier
+    }
+
+    class Tier {
+      <<enumeration>>
+      STANDARD
+      SILVER
+      GOLD
+      -multiplier: BigDecimal
+      +multiplier() BigDecimal
+    }
+
+    class MemberRepository {
+      <<interface>>
+      +save(member: Member)
+      +findById(id: String) Member
+    }
+
+    class InMemoryMemberRepository {
+      -members: Map~String, Member~
+      +save(member: Member)
+      +findById(id: String) Member
+    }
+
+    class MemberNotFoundException
+    class DuplicateMemberException
   }
 
-  class Tier {
-    <<enumeration>>
-    STANDARD
-    SILVER
-    GOLD
-    -multiplier: BigDecimal
-    +multiplier() BigDecimal
-  }
+  namespace points {
+    class PointsAward {
+      <<record>>
+      member: Member
+      amount: BigDecimal
+      points: int
+    }
 
-  class MemberRepository {
-    <<interface>>
-    +save(member: Member)
-    +findById(id: String) Member
-  }
-
-  class InMemoryMemberRepository {
-    -members: Map~String, Member~
-    +save(member: Member)
-    +findById(id: String) Member
-  }
-
-  class MemberNotFoundException
-  class DuplicateMemberException
-
-  class PointsAward {
-    <<record>>
-    member: Member
-    amount: BigDecimal
-    points: int
-  }
-
-  class PointsCalculator {
-    -repository: MemberRepository
-    +PointsCalculator(repository: MemberRepository)
-    +calculatePoints(memberId: String, amount: BigDecimal) PointsAward
-    -validate(memberId: String, amount: BigDecimal)
-    -basePoints(amount: BigDecimal) BigDecimal
-    -applyTierMultiplier(basePoints: BigDecimal, tier: Tier) int
-    -addBonusIfEligible(points: int, amount: BigDecimal) int
-    -qualifiesForBonus(amount: BigDecimal) boolean
+    class PointsCalculator {
+      -repository: MemberRepository
+      +PointsCalculator(repository: MemberRepository)
+      +calculatePoints(memberId: String, amount: BigDecimal) PointsAward
+      -validate(memberId: String, amount: BigDecimal)
+      -basePoints(amount: BigDecimal) BigDecimal
+      -applyTierMultiplier(basePoints: BigDecimal, tier: Tier) int
+      -addBonusIfEligible(points: int, amount: BigDecimal) int
+      -qualifiesForBonus(amount: BigDecimal) boolean
+    }
   }
 
   class Demo {
@@ -160,13 +164,28 @@ The rule values live in named constants (`BASE_POINT_DENOMINATOR`, `LOYALTY_BONU
 **6. The calculator returns a result; it doesn't print.**
 `calculatePoints` used to print to `System.out` and return a bare `int`. It now returns a `PointsAward` record holding the member, the original amount and the points (`Award` tests), and `Demo` decides how to display it. The calculator has one job: applying the points rules.
 
-| Class | Responsibility |
+| Class | Package | Responsibility |
+|---|---|---|
+| `PointsCalculator` | `points` | Applies the points rules and returns a `PointsAward` |
+| `MemberRepository` | `member` | Stores and finds members; its contract is defined by `MemberRepositoryContractTest` |
+| `Member` | `member` | Holds a valid member's identity and tier |
+| `Tier` | `member` | Knows each tier's multiplier |
+| `Demo` | root | Seeds sample members and prints the results |
+
+**7. The code is grouped by feature into packages.**
+The repository interface, its implementation and the points classes used to sit together in the root package `com.brightline.loyalty`, apart from the member types and exceptions they work with. The code is now split by feature:
+
+| Package | Contents |
 |---|---|
-| `PointsCalculator` | Applies the points rules and returns a `PointsAward` |
-| `MemberRepository` | Stores and finds members; its contract is defined by `MemberRepositoryContractTest` |
-| `Member` | Holds a valid member's identity and tier |
-| `Tier` | Knows each tier's multiplier |
-| `Demo` | Seeds sample members and prints the results |
+| `com.brightline.loyalty.member` | `Member`, `Tier`, `MemberRepository`, `InMemoryMemberRepository`, `MemberNotFoundException`, `DuplicateMemberException` |
+| `com.brightline.loyalty.points` | `PointsCalculator`, `PointsAward` |
+| `com.brightline.loyalty` | `Demo`, which wires the two together |
+
+The repository interface now sits next to the member types it stores and the exceptions it declares, so the member domain and its storage contract are in one place. `points` depends on `member` (the calculator looks members up through `MemberRepository`), and nothing in `member` depends on `points`, so the dependency runs one way.
+
+The tests mirror the same packages. `InMemoryMemberRepositoryTest` and `MemberRepositoryContractTest` are in `member`, because the first extends the package-private contract test. `PointsCalculatorTest` and `PointsCalculatorIT` are in `points`.
+
+Unlike the decisions above, this one is not pinned by a test. Nothing yet fails the build if a class in `member` starts depending on `points`.
 
 ## How the design absorbs the coming rule change
 
@@ -185,10 +204,10 @@ Brightline is about to add a new tier.
 
 | Original | Decision | Why |
 |---|---|---|
-| `MemberRepository` interface | **Kept and extended** | The abstraction was right but unused. Added `save()`, and declared `MemberNotFoundException` and `DuplicateMemberException` so every implementation shares the same failure contract. |
-| `InMemoryMemberRepository` | **Fixed** | Kept the `HashMap` storage. Removed the hard-coded seed data, replaced the `null` return with `MemberNotFoundException`, and added ID validation and the duplicate check. |
+| `MemberRepository` interface | **Kept, extended and moved** | The abstraction was right but unused. Added `save()`, and declared `MemberNotFoundException` and `DuplicateMemberException` so every implementation shares the same failure contract. Moved from the root package into `member`, next to the types it stores. |
+| `InMemoryMemberRepository` | **Fixed and moved** | Kept the `HashMap` storage. Removed the hard-coded seed data, replaced the `null` return with `MemberNotFoundException`, and added ID validation and the duplicate check. Moved into `member` with its interface. |
 | `Member` | **Fixed** | Kept its shape (ID, name, tier, getters). Changed the tier from `String` to `Tier`, and made the constructor reject a null tier and a null or blank ID or name. |
-| `PointsCalculator` | **Rewrote** | Almost every line had a defect: a self-created dependency, `double` money, the string `if/else` chain, the catch-all, printing and magic numbers. Only the business rules carried over, and each is now pinned by a test. |
+| `PointsCalculator` | **Rewrote** | Almost every line had a defect: a self-created dependency, `double` money, the string `if/else` chain, the catch-all, printing and magic numbers. Only the business rules carried over, and each is now pinned by a test. It now lives in the new `points` package, with the `PointsAward` record it returns. |
 | `Demo` | **Kept and fixed** | Still a runner for seeing the calculator work. It now creates its own members and does the printing that used to be in the calculator. |
 
 ### Tests
@@ -206,7 +225,7 @@ Tests added for behaviour the original suite never checked: unknown members, inv
 
 Passing tests aren't enough: the original suite passed while testing nothing. So the suite was checked in two ways:
 - **JaCoCo:** every line and branch of `PointsCalculator`, `Member`, `Tier`, `InMemoryMemberRepository` and the exceptions is covered. `Demo` is a manual runner and has no unit tests.
-- **PIT mutation testing:** PIT changes the production code (for example flipping `>` to `>=` on the bonus threshold) and reruns the tests. Every mutant outside `Demo` was killed, so each tested line has an assertion that fails when the logic is wrong.
+- **PIT mutation testing:** PIT changes the production code (for example flipping `>` to `>=` on the bonus threshold) and reruns the tests. Every mutant outside `Demo` was killed (100% in both the `member` and `points` packages), so each tested line has an assertion that fails when the logic is wrong.
 
 `mvn verify` runs 103 unit tests and 9 integration tests, all passing.
 
