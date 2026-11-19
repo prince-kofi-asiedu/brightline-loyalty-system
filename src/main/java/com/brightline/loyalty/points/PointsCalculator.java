@@ -2,6 +2,7 @@ package com.brightline.loyalty;
 
 import com.brightline.loyalty.member.Member;
 import com.brightline.loyalty.member.MemberNotFoundException;
+import com.brightline.loyalty.member.MemberRepository;
 import com.brightline.loyalty.member.Tier;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
