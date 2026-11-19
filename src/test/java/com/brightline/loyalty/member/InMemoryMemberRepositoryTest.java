@@ -1,6 +1,5 @@
 package com.brightline.loyalty.member;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -19,22 +18,23 @@ class InMemoryMemberRepositoryTest extends MemberRepositoryContractTest {
 
     @ParameterizedTest(name = "id = \"{0}\"")
     @ValueSource(strings = {"standard-member", "m1", " padded-id "})
-    @DisplayName("validateMemberId accepts any non-blank id")
-    void validateMemberIdAcceptsNonBlankId(String id) {
+    @DisplayName("findById accepts any non-blank id and goes on to look it up")
+    void findByIdWithNonBlankIdReachesLookup(String id) {
         InMemoryMemberRepository repository = new InMemoryMemberRepository();
 
-        assertDoesNotThrow(() -> repository.validateMemberId(id));
+        // Not found (rather than IllegalArgumentException) shows the id passed validation
+        assertThrows(MemberNotFoundException.class, () -> repository.findById(id));
     }
 
     @ParameterizedTest(name = "id = \"{0}\"")
     @NullAndEmptySource
     @ValueSource(strings = {" ", "   ", "\t", "\n"})
-    @DisplayName("validateMemberId rejects a null or blank id")
-    void validateMemberIdRejectsNullOrBlankId(String id) {
+    @DisplayName("findById rejects a null or blank id with a clear message")
+    void findByIdWithNullOrBlankIdThrowsWithMessage(String id) {
         InMemoryMemberRepository repository = new InMemoryMemberRepository();
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> repository.validateMemberId(id));
+                () -> repository.findById(id));
 
         assertEquals("Member id cannot be null or blank", exception.getMessage());
     }

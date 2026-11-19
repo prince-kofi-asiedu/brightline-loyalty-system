@@ -26,13 +26,13 @@ public class InMemoryMemberRepository implements MemberRepository {
         members.put(memberId, member);
     }
 
-    void validateMemberId(String id) {
+    private void validateMemberId(String id) {
         if (id == null || id.isBlank()) {
             throw new IllegalArgumentException("Member id cannot be null or blank");
         }
     }
 
-    boolean memberExists(String id) {
+    private boolean memberExists(String id) {
         return members.containsKey(id);
     }
 }
